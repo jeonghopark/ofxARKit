@@ -222,7 +222,14 @@ namespace ofxARKit {
         
         //! returns the current view matrix from the camera
         ofMatrix4x4 getViewMatrix(){
-            return camera->getCameraMatrices().cameraView;
+            ofMatrix4x4 _rotZ = {
+                float(cos(PI * 0.5)), -float(sin(PI * 0.5)), 0, 0,
+                float(sin(PI * 0.5)), float(cos(PI * 0.5)), 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1
+            };
+
+            return camera->getCameraMatrices().cameraView * _rotZ;
         }
         
         //! Returns the camera's current transform matrix.

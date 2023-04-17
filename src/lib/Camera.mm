@@ -131,10 +131,17 @@ namespace ofxARKit {
             }
         }
         void Camera::setARCameraMatrices(){
+            ofMatrix4x4 _rotZ = {
+                float(cos(PI * 0.5)), -float(sin(PI * 0.5)), 0, 0,
+                float(sin(PI * 0.5)), float(cos(PI * 0.5)), 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1
+            };
+
             ofSetMatrixMode(OF_MATRIX_PROJECTION);
             ofLoadMatrix(cameraMatrices.cameraProjection);
             ofSetMatrixMode(OF_MATRIX_MODELVIEW);
-            ofLoadMatrix(cameraMatrices.cameraView);
+            ofLoadMatrix(cameraMatrices.cameraView * _rotZ);
         }
         
         void Camera::updateInterfaceOrientation(int newOrientation){

@@ -110,7 +110,7 @@ namespace ofxARKit {
 
     
     ofxARKit::common::ARCameraMatrices ARProcessor::getMatricesForOrientation(UIInterfaceOrientation orientation,float near, float far){
-        //return camera->getMatricesForOrientation(orientation,near,far);
+        return camera->getMatricesForOrientation(orientation,near,far);
     }
     
     
