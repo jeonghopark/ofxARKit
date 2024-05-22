@@ -26,8 +26,8 @@ using namespace ofxARKit::core;
     
     
     OFAppViewController *viewController;
-    viewController = [[[OFAppViewController alloc] initWithFrame:[[UIScreen mainScreen] bounds]
-                                                                 app:new ofApp(self.session)] autorelease];
+    viewController = [[OFAppViewController alloc] initWithFrame:[[UIScreen mainScreen] bounds]
+                                                                 app:new ofApp(self.session)];
     
     [self.navigationController setNavigationBarHidden:TRUE];
     [self.navigationController pushViewController:viewController animated:NO];

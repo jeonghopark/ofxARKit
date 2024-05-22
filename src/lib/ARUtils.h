@@ -42,19 +42,19 @@ namespace ofxARKit { namespace common{
         }
         
         //! convert to oF mat4
-        static inline const ofMatrix4x4 toMat4( const matrix_float4x4& mat ) {
-            return convert<matrix_float4x4, ofMatrix4x4>(mat);
+        static inline const ofMatrix4x4 toMat4( const simd_float4x4& mat ) {
+            return convert<simd_float4x4, ofMatrix4x4>(mat);
         }
         
         //! convert to simd based mat4
-        static const matrix_float4x4 toSIMDMat4(ofMatrix4x4 &mat){
-            return convert<ofMatrix4x4,matrix_float4x4>(mat);
+        static const simd_float4x4 toSIMDMat4(ofMatrix4x4 &mat){
+            return convert<ofMatrix4x4,simd_float4x4>(mat);
         }
         
         
         //! convert
-        static glm::mat4 toGlmMat4( const matrix_float4x4 & mat ) {
-            return convert<matrix_float4x4, glm::mat4>(mat);
+        static glm::mat4 toGlmMat4( const simd_float4x4 & mat ) {
+            return convert<simd_float4x4, glm::mat4>(mat);
         }
         
         
@@ -66,12 +66,12 @@ namespace ofxARKit { namespace common{
         }
         
         //! Constructs a generalized model matrix for a SIMD mat4
-        static ofMatrix4x4 modelMatFromTransform( matrix_float4x4 transform )
+        static ofMatrix4x4 modelMatFromTransform( simd_float4x4 transform )
         {
-            matrix_float4x4 coordinateSpaceTransform = matrix_identity_float4x4;
+            simd_float4x4 coordinateSpaceTransform = matrix_identity_float4x4;
             // Flip Z axis to convert geometry from right handed to left handed
             coordinateSpaceTransform.columns[2].z = -1.0;
-            matrix_float4x4 modelMat = matrix_multiply(transform, coordinateSpaceTransform);
+            simd_float4x4 modelMat = matrix_multiply(transform, coordinateSpaceTransform);
             return toMat4( modelMat );
         }
         

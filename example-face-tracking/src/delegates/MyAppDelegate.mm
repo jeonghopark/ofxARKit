@@ -21,16 +21,15 @@
      *  UINavigationController is handy for managing the navigation between multiple view controllers, more info here,
      *  http://developer.apple.com/library/ios/#documentation/uikit/reference/UINavigationController_Class/Reference/Reference.html
      *
-     *  I then push MyAppViewController onto the UINavigationController stack.
-     *  MyAppViewController is a custom view controller with a 3 button menu.
+     *  I then push oFAppViewController onto the UINavigationController stack.
+     *  oFAppViewController is a custom view controller with a 3 button menu.
      *
      **/
     
-    self.navigationController = [[[UINavigationController alloc] init] autorelease];
+    self.navigationController = [[UINavigationController alloc] init];
     [self.window setRootViewController:self.navigationController];
     
-    [self.navigationController pushViewController:[[[MyAppViewController alloc] init] autorelease]
-                                         animated:YES];
+    [self.navigationController pushViewController:[[MyAppViewController alloc] init] animated:YES];
     
     //--- style the UINavigationController
     self.navigationController.navigationBar.barStyle = UIBarStyleBlackTranslucent;
@@ -41,7 +40,6 @@
 
 - (void) dealloc {
     self.navigationController = nil;
-    [super dealloc];
 }
 
 @end

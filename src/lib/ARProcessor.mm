@@ -90,7 +90,7 @@ namespace ofxARKit {
     }
     // =========== CAMERA API ============ //
     void ARProcessor::forceInterfaceOrientation(UIInterfaceOrientation orientation){
-        //camera->setInterfaceOrientation(orientation);
+        camera->updateInterfaceOrientation(orientation);
     }
     void ARProcessor::setARCameraMatrices(){
         camera->setARCameraMatrices();

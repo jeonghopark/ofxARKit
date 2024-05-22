@@ -56,7 +56,7 @@ namespace ofxARKit {
         CVOpenGLESTextureRef Camera::getTextureDepth(){
             return [_view getConvertedTextureDepth];
         }
-        ofMatrix3x3 Camera::getAffineTransform(){
+        glm::mat3 Camera::getAffineTransform(){
             
             // correspondance CGAffineTransform --> ofMatrix3x3 :
             //                    a  b  0       |     a  b  c
@@ -64,14 +64,15 @@ namespace ofxARKit {
             //                    tx ty 1       |     g  h  i
             
             CGAffineTransform cAffine = [_view getAffineCameraTransform];
-            ofMatrix3x3 matTransAffine;
-            matTransAffine.a = cAffine.a;
-            matTransAffine.b = cAffine.b;
-            matTransAffine.d = cAffine.c;
-            matTransAffine.e = cAffine.d;
-            matTransAffine.g = cAffine.tx;
-            matTransAffine.h = cAffine.ty;
-            
+            //            (T x0, T y0, T z0, T x1, T y1, T z1, T x2, T y2, T z2)
+            glm::mat3 matTransAffine(cAffine.a, cAffine.b, 0, cAffine.c, cAffine.d, 0, cAffine.tx, cAffine.ty, 1);
+            //            matTransAffine.a = cAffine.a;
+            //            matTransAffine.b = cAffine.b;
+            //            matTransAffine.d = cAffine.c;
+            //            matTransAffine.e = cAffine.d;
+            //            matTransAffine.g = cAffine.tx;
+            //            matTransAffine.h = cAffine.ty;
+
             return matTransAffine;
         }
 #endif
@@ -79,7 +80,7 @@ namespace ofxARKit {
         void Camera::update(){
             [_view draw];
             
-            cameraMatrices.cameraTransform = common::convert<matrix_float4x4,ofMatrix4x4>(session.currentFrame.camera.transform);
+            cameraMatrices.cameraTransform = common::convert<simd_float4x4,ofMatrix4x4>(session.currentFrame.camera.transform);
             
             getMatricesForOrientation(orientation, near, far);
         }
@@ -131,17 +132,10 @@ namespace ofxARKit {
             }
         }
         void Camera::setARCameraMatrices(){
-            ofMatrix4x4 _rotZ = {
-                float(cos(PI * 0.5)), -float(sin(PI * 0.5)), 0, 0,
-                float(sin(PI * 0.5)), float(cos(PI * 0.5)), 0, 0,
-                0, 0, 1, 0,
-                0, 0, 0, 1
-            };
-
             ofSetMatrixMode(OF_MATRIX_PROJECTION);
             ofLoadMatrix(cameraMatrices.cameraProjection);
             ofSetMatrixMode(OF_MATRIX_MODELVIEW);
-            ofLoadMatrix(cameraMatrices.cameraView * _rotZ);
+            ofLoadMatrix(cameraMatrices.cameraView);
         }
         
         void Camera::updateInterfaceOrientation(int newOrientation){

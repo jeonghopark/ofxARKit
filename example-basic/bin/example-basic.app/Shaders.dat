@@ -1,0 +1,4 @@
+dependencies: \
+  /Users/jeonghopark/openFrameworks/addons/ofxARKit/src/lib/Shaders.metal \
+  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/metal/ios/lib/clang/32023.157/include/metal/module.modulemap \
+  /Users/jeonghopark/openFrameworks/addons/ofxARKit/src/lib/ShaderTypes.h
