@@ -12,20 +12,20 @@
 #define STRINGIFY(A) #A
 #include "ofMain.h"
 
-namespace ofxARKit { namespace common{
+namespace ofxARKit {
+    namespace common {
     
         //! joined camera matrices as one object.
         typedef struct {
             ofMatrix4x4 cameraTransform;
             ofMatrix4x4 cameraProjection;
             ofMatrix4x4 cameraView;
-        }ARCameraMatrices;
+        } ARCameraMatrices;
         
         //! borrowed from https://github.com/wdlindmeier/Cinder-Metal/blob/master/include/MetalHelpers.hpp
         //! helpful converting to and from SIMD
         template <typename T, typename U >
-        const U static inline convert( const T & t )
-        {
+        const U static inline convert( const T & t ) {
             U tmp;
             memcpy(&tmp, &t, sizeof(U));
             U ret = tmp;
@@ -33,7 +33,7 @@ namespace ofxARKit { namespace common{
         }
         
         //! Helper function to determine if user is running at least ios 11.3
-        static bool isIos113(){
+        static bool isIos113() {
             if(@available(iOS 11.3, *)){
                 return true;
             }else{
@@ -58,13 +58,40 @@ namespace ofxARKit { namespace common{
         }
         
         
-        //! Extracts the xyz position from a matrix. It's assumed that the matrix you pass in
-        //! is based off of a ARKit transform matrix which appears to switch some things around.
-        static ofVec3f getAnchorXYZ(ofMatrix4x4 mat){
+
+        //! 디바이스 방향을 고려한 좌표계 변환
+        static ofVec3f getAnchorXYZWithOrientation(ofMatrix4x4 mat, UIInterfaceOrientation orientation){
             ofVec3f vec(mat.getRowAsVec3f(3));
-            return ofVec3f(vec.y,vec.x,vec.z);
+            
+            switch(orientation) {
+                case UIInterfaceOrientationPortrait:
+                    // Portrait: 정상적인 변환
+                    return ofVec3f(vec.x, vec.y, vec.z);
+                    
+                case UIInterfaceOrientationPortraitUpsideDown:
+                    // Portrait Upside Down: X, Y 반전
+                    return ofVec3f(-vec.x, -vec.y, vec.z);
+                    
+                case UIInterfaceOrientationLandscapeLeft:
+                    // Landscape Left: X와 Y 교환, Y 반전
+                    return ofVec3f(-vec.y, vec.x, vec.z);
+                    
+                case UIInterfaceOrientationLandscapeRight:
+                    // Landscape Right: X와 Y 교환, X 반전
+                    return ofVec3f(vec.y, -vec.x, vec.z);
+                    
+                default:
+                    return ofVec3f(vec.x, vec.y, vec.z);
+            }
         }
-        
+
+        //! 기존 함수를 방향 인식 버전으로 업데이트
+        static ofVec3f getAnchorXYZ(ofMatrix4x4 mat){
+            UIInterfaceOrientation currentOrientation = (UIInterfaceOrientation)[[UIApplication sharedApplication] statusBarOrientation];
+            return getAnchorXYZWithOrientation(mat, currentOrientation);
+        }
+
+
         //! Constructs a generalized model matrix for a SIMD mat4
         static ofMatrix4x4 modelMatFromTransform( simd_float4x4 transform )
         {

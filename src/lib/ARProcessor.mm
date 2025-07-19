@@ -115,9 +115,33 @@ namespace ofxARKit {
     
     
     void ARProcessor::deviceOrientationChanged(int newOrientation){
-        camera->updateInterfaceOrientation(newOrientation);
+        // 실제 디바이스 방향에 따라 인터페이스 방향 설정
+        UIInterfaceOrientation interfaceOrientation;
+        
+        switch(newOrientation) {
+            case UIDeviceOrientationPortrait:
+                interfaceOrientation = UIInterfaceOrientationPortrait;
+                break;
+            case UIDeviceOrientationPortraitUpsideDown:
+                interfaceOrientation = UIInterfaceOrientationPortraitUpsideDown;
+                break;
+            case UIDeviceOrientationLandscapeLeft:
+                // 디바이스가 왼쪽으로 기울어지면 인터페이스는 오른쪽
+                interfaceOrientation = UIInterfaceOrientationLandscapeRight;
+                break;
+            case UIDeviceOrientationLandscapeRight:
+                // 디바이스가 오른쪽으로 기울어지면 인터페이스는 왼쪽
+                interfaceOrientation = UIInterfaceOrientationLandscapeLeft;
+                break;
+            default:
+                // 현재 방향 유지
+                interfaceOrientation = (UIInterfaceOrientation)[[UIApplication sharedApplication] statusBarOrientation];
+                break;
+        }
+        
+        camera->updateInterfaceOrientation(interfaceOrientation);
     }
-    
+
     // ======= ANCHOR API ========= //
     void ARProcessor::addAnchor(float zZoom){
         anchorController->addAnchor(zZoom);
@@ -180,8 +204,4 @@ namespace ofxARKit {
         }
     }
     
-
-        
-    
-
 }

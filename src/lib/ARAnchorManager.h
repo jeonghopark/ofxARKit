@@ -81,6 +81,21 @@ namespace ofxARKit {
                 }
             }
             
+            
+            //! Returns the vector of currently found anchors
+            std::vector<ARObject> getAnchors(){
+                return anchors;
+            }
+            
+            //! Returns the last added anchor (most recently added)
+            ARObject getLastAnchor(){
+                if(!anchors.empty()){
+                    return anchors.back();
+                }
+                return ARObject(); // 빈 객체 반환
+            }
+            
+            
             //! Sets the number of planes we want to track. By default, we track all available planes.
             void setNumberOfPlanesToTrack(int num=0);
             
