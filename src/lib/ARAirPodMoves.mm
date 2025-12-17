@@ -71,9 +71,7 @@ id __rotationDelegate = nil;
 }
 
 -(void)dealloc {
-    
     [self stopTracking];
-    
 }
 
 @end

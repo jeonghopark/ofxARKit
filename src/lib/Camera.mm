@@ -18,21 +18,27 @@ namespace ofxARKit {
             viewport = CGRectMake(0,0,ofGetWindowWidth(),ofGetWindowHeight());
             auto context = ofxiOSGetGLView().context;
             
+            // 현재 디바이스 방향으로 초기화
+            orientation = (UIInterfaceOrientation)[[UIApplication sharedApplication] statusBarOrientation];
+            NSLog(@"📱 Camera 초기화 - 현재 방향: %ld", (long)orientation);
+            
             setup(session,viewport,context);
             
             mesh = ofMesh::plane(ofGetWindowWidth(), ofGetWindowHeight());
 
-            if (this->session.configuration.frameSemantics == ARFrameSemanticPersonSegmentationWithDepth) {
+ if(this->session.configuration.frameSemantics == ARFrameSemanticPersonSegmentationWithDepth){
+                
                 shader.setupShaderFromSource(GL_VERTEX_SHADER, vertex);
                 shader.setupShaderFromSource(GL_FRAGMENT_SHADER, fragment);
-            } else {
+            }else{
+
                 shader.setupShaderFromSource(GL_VERTEX_SHADER, vertex);
                 shader.setupShaderFromSource(GL_FRAGMENT_SHADER, fragment);
             }
             
             shader.linkProgram();
             
-            near = 0.001f;
+            near = 0.1f;
             far = 1000.0f;
         }
         
@@ -54,7 +60,7 @@ namespace ofxARKit {
         CVOpenGLESTextureRef Camera::getTextureDepth(){
             return [_view getConvertedTextureDepth];
         }
-        glm::mat3 Camera::getAffineTransform(){
+        ofMatrix3x3 Camera::getAffineTransform(){
             
             // correspondance CGAffineTransform --> ofMatrix3x3 :
             //                    a  b  0       |     a  b  c
@@ -62,15 +68,14 @@ namespace ofxARKit {
             //                    tx ty 1       |     g  h  i
             
             CGAffineTransform cAffine = [_view getAffineCameraTransform];
-            //            (T x0, T y0, T z0, T x1, T y1, T z1, T x2, T y2, T z2)
-            glm::mat3 matTransAffine(cAffine.a, cAffine.b, 0, cAffine.c, cAffine.d, 0, cAffine.tx, cAffine.ty, 1);
-            //            matTransAffine.a = cAffine.a;
-            //            matTransAffine.b = cAffine.b;
-            //            matTransAffine.d = cAffine.c;
-            //            matTransAffine.e = cAffine.d;
-            //            matTransAffine.g = cAffine.tx;
-            //            matTransAffine.h = cAffine.ty;
-
+            ofMatrix3x3 matTransAffine;
+            matTransAffine.a = cAffine.a;
+            matTransAffine.b = cAffine.b;
+            matTransAffine.d = cAffine.c;
+            matTransAffine.e = cAffine.d;
+            matTransAffine.g = cAffine.tx;
+            matTransAffine.h = cAffine.ty;
+            
             return matTransAffine;
         }
 #endif
@@ -78,16 +83,13 @@ namespace ofxARKit {
         void Camera::update(){
             [_view draw];
             
-            // 현재 방향 체크 및 업데이트
-            UIInterfaceOrientation currentOrientation = (UIInterfaceOrientation)[[UIApplication sharedApplication] statusBarOrientation];
-            if(orientation != currentOrientation) {
-                updateInterfaceOrientation(currentOrientation);
-            }
+            // 매 프레임마다 현재 방향 업데이트
+            orientation = (UIInterfaceOrientation)[[UIApplication sharedApplication] statusBarOrientation];
             
-            cameraMatrices.cameraTransform = common::convert<simd_float4x4,ofMatrix4x4>(session.currentFrame.camera.transform);
+            cameraMatrices.cameraTransform = common::convert<matrix_float4x4,ofMatrix4x4>(session.currentFrame.camera.transform);
+            
             getMatricesForOrientation(orientation, near, far);
         }
-
 
 
         ofxARKit::common::ARCameraMatrices Camera::getCameraMatrices(){
@@ -148,43 +150,46 @@ namespace ofxARKit {
             auto width = ofGetWindowWidth();
             auto height = ofGetWindowHeight();
             
-            // 올바른 viewport 설정
+            // this might be an oF thing - but values seem to be reversed after the first call when calling ofGetWindowWidth
             switch(orientation){
                 case UIInterfaceOrientationPortrait:
-                    // Portrait 모드에서는 width < height여야 함
-                    if(width > height){
-                        viewport = CGRectMake(0, 0, height, width);
-                    } else {
-                        viewport = CGRectMake(0, 0, width, height);
-                    }
-                    break;
                     
-                case UIInterfaceOrientationPortraitUpsideDown:
                     if(width > height){
-                        viewport = CGRectMake(0, 0, height, width);
-                    } else {
-                        viewport = CGRectMake(0, 0, width, height);
+                        viewport = CGRectMake(0,0,ofGetWindowHeight(),ofGetWindowWidth());
                     }
                     break;
                     
                 case UIInterfaceOrientationLandscapeLeft:
-                case UIInterfaceOrientationLandscapeRight:
-                    // Landscape 모드에서는 width > height여야 함
+                    
                     if(width < height){
-                        viewport = CGRectMake(0, 0, height, width);
-                    } else {
-                        viewport = CGRectMake(0, 0, width, height);
+                        viewport = CGRectMake(0,0,ofGetWindowHeight(),ofGetWindowWidth());
+                    }
+                    break;
+                    
+                case UIInterfaceOrientationLandscapeRight:
+                    
+                    if(width < height){
+                        viewport = CGRectMake(0,0,ofGetWindowHeight(),ofGetWindowWidth());
                     }
                     break;
                     
                 case UIInterfaceOrientationUnknown:
-                default:
-                    // Unknown일 때는 현재 상태 유지
-                    viewport = CGRectMake(0, 0, width, height);
+                    
+                    if(width > height){
+                        viewport = CGRectMake(0,0,ofGetWindowHeight(),ofGetWindowWidth());
+                    }
                     break;
+                    
+                case UIInterfaceOrientationPortraitUpsideDown:
+                    
+                    if(width > height){
+                        viewport = CGRectMake(0,0,ofGetWindowHeight(),ofGetWindowWidth());
+                    }
+                    break;
+                    
             }
             
-            NSLog(@"Orientation changed to %d, viewport: %@", (int)orientation, NSStringFromCGRect(viewport));
+            //NSLog(@"view is %@",NSStringFromCGRect(viewport));
         }
         
         void Camera::draw(){

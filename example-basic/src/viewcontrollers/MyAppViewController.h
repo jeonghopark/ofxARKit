@@ -5,6 +5,8 @@
 
 #import <UIKit/UIKit.h>
 #import <ARKit/ARKit.h>
+#import <AVFoundation/AVFoundation.h>
+
 @interface MyAppViewController : UIViewController
 
 @end

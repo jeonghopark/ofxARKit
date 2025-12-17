@@ -15,12 +15,12 @@ namespace ofxARKit { namespace core {
         typedef struct {
             bool useFaceTracking = false;
             bool usePlaneTracking = false;
-            bool useImageDetection = true;
+            bool useImageDetection = false;
             bool useLightEstimation = false;
             bool useAudio = false;
             bool useHighRes = true;
             bool useAutoFocus = true;
-            bool useARFrameSemanticPersonSegmentationWithDepth = false;
+            bool useARFrameSemanticPersonSegmentationWithDepth = true;
             
             NSObject<ARSessionDelegate> * delegateClass = NULL;
             
@@ -69,7 +69,7 @@ namespace ofxARKit { namespace core {
             
             SessionFormat& enableSementicTracking(){
                 
-//                if([ARWorldTrackingConfiguration supportsFrameSemantics]){
+              if([ARWorldTrackingConfiguration supportsFrameSemantics:ARFrameSemanticSceneDepth]){
                     if (@available(iOS 13.0, *)) {
                         state.useARFrameSemanticPersonSegmentationWithDepth = true;
 
@@ -77,9 +77,9 @@ namespace ofxARKit { namespace core {
                         // Fallback on earlier versions
                         NSLog(@"Update this device to a more recent version >= 13.0 unable to use sementic tracking");
                     }
-//                }else {
-//                    NSLog(@"This device is unfortunately unable to use sementic tracking");
-//                }
+                }else {
+                    NSLog(@"This device is unfortunately unable to use sementic tracking");
+                }
                 return *this;
             }
             

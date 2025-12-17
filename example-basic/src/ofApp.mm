@@ -68,6 +68,7 @@ void ofApp::draw() {
     
     if (session.currentFrame){
         if (session.currentFrame.camera){
+           
             camera.begin();
             processor->setARCameraMatrices();
             

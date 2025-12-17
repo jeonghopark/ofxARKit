@@ -42,11 +42,11 @@ namespace ofxARKit  {
             if (currentFrame) {
                 
                 // Create a transform with a translation of 0.2 meters in front of the camera
-                simd_float4x4 translation = matrix_identity_float4x4;
+                matrix_float4x4 translation = matrix_identity_float4x4;
                 
                 translation.columns[3].z = zZoom;
                 
-                simd_float4x4 transform = matrix_multiply(currentFrame.camera.transform, translation);
+                matrix_float4x4 transform = matrix_multiply(currentFrame.camera.transform, translation);
                 
                 // Add a new anchor to the session
                 ARAnchor *anchor = [[ARAnchor alloc] initWithTransform:transform];
@@ -67,13 +67,13 @@ namespace ofxARKit  {
                 ofVec4f pos = ofxARKit::common::screenToWorld(position, projection, viewMatrix);
                 
                 // build matrix for the anchor
-                simd_float4x4 translation = matrix_identity_float4x4;
+                matrix_float4x4 translation = matrix_identity_float4x4;
                 
                 translation.columns[3].x = pos.x;
                 translation.columns[3].y = pos.y;
                 translation.columns[3].z = position.z;
                 
-                simd_float4x4 transform = matrix_multiply(session.currentFrame.camera.transform, translation);
+                matrix_float4x4 transform = matrix_multiply(session.currentFrame.camera.transform, translation);
                 
                 // Add a new anchor to the session
                 ARAnchor *anchor = [[ARAnchor alloc] initWithTransform:transform];
@@ -140,7 +140,7 @@ namespace ofxARKit  {
                         
                         // calc values from anchor.
                         NSUUID * uuid = im.identifier;
-                        ofMatrix4x4 transform = convert<simd_float4x4, ofMatrix4x4>(im.transform);
+                        ofMatrix4x4 transform = convert<matrix_float4x4, ofMatrix4x4>(im.transform);
                         string image = std::string([im.referenceImage.name UTF8String]);
                         float width = im.referenceImage.physicalSize.width;
                         float height = im.referenceImage.physicalSize.height;
@@ -195,7 +195,7 @@ namespace ofxARKit  {
                         ARPlaneAnchor* pa = (ARPlaneAnchor*) anchor;
                         
                         // calc values from anchor.
-                        ofMatrix4x4 paTransform = convert<simd_float4x4, ofMatrix4x4>(pa.transform);
+                        ofMatrix4x4 paTransform = convert<matrix_float4x4, ofMatrix4x4>(pa.transform);
                         ofVec3f center = convert<vector_float3,ofVec3f>(pa.center);
                         ofVec3f extent = convert<vector_float3,ofVec3f>(pa.extent);
                         

@@ -4,6 +4,7 @@
 //
 
 #import "ofxiOSAppDelegate.h"
+#import <AVFoundation/AVFoundation.h>
 
 @interface MyAppDelegate : ofxiOSAppDelegate {
     //

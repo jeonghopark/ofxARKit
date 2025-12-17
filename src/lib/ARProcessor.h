@@ -178,7 +178,7 @@ namespace ofxARKit {
         CVOpenGLESTextureRef getTextureDepth(){ return camera->getTextureDepth();}
 
         // Returns the affine transformation matrix used to do person segmentation.
-        glm::mat3 getAffineTransform(){ return camera->getAffineTransform();}
+        ofMatrix3x3 getAffineTransform(){ return camera->getAffineTransform();}
 
         //! Draws a debug view of camera image along with person segmentation
 

@@ -8,13 +8,13 @@ int main(){
     settings.enableDepth = true; // enables depth buffer for 3d drawing.
     settings.enableAntiAliasing = false; // enables anti-aliasing which smooths out graphics on the screen.
     settings.numOfAntiAliasingSamples = 0; // number of samples used for anti-aliasing.
-    settings.enableHardwareOrientation = false; // enables native view orientation.
-    settings.enableHardwareOrientationAnimation = false; // enables native orientation changes to be animated.
+    settings.enableHardwareOrientation = true; // ⬅️ true로 변경! 디바이스 방향 자동 감지
+    settings.enableHardwareOrientationAnimation = true; // ⬅️ true로 변경! 방향 전환 애니메이션
     settings.glesVersion = OFXIOS_RENDERER_ES2; // type of renderer to use, ES1, ES2, etc.
     
     ofAppiOSWindow * window = (ofAppiOSWindow *)(ofCreateWindow(settings).get());
     
-    bool bUseNative = true;
+    bool bUseNative = false;
     if (bUseNative){
         /**
          *
@@ -39,7 +39,22 @@ int main(){
          *
          **/
         
-        return ofRunApp(new ofApp());
+        // AR 세션 생성
+        using namespace ofxARKit::core;
+        SessionFormat format;
+        format.enableLighting();
+        ARSession * session = generateNewSession(format);
+        
+        NSLog(@"🚀 main.mm: AR 세션 생성");
+        NSLog(@"   Session: %@", session);
+        
+        if(session) {
+            NSLog(@"✅ AR 세션 생성 성공!");
+            return ofRunApp(new ofApp(session));
+        } else {
+            NSLog(@"❌ AR 세션 생성 실패!");
+            return ofRunApp(new ofApp());
+        }
     }
     
 }

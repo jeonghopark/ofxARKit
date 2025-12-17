@@ -28,7 +28,8 @@ static const float kImagePlaneVertexData[16] = {
 
 
 // Table of equivalent formats across CoreVideo, Metal, and OpenGL
-static const AAPLTextureFormatInfo AAPLInteropFormatTable[] = {
+static const AAPLTextureFormatInfo AAPLInteropFormatTable[] =
+{
     // Core Video Pixel Format,               Metal Pixel Format,            GL internalformat, GL format,   GL type
     { kCVPixelFormatType_32BGRA,              MTLPixelFormatBGRA8Unorm,      GL_RGBA,           GL_BGRA_EXT, GL_UNSIGNED_INT_8_8_8_8_REV },
     { kCVPixelFormatType_32BGRA,              MTLPixelFormatBGRA8Unorm_sRGB, GL_RGBA,           GL_BGRA_EXT, GL_UNSIGNED_INT_8_8_8_8_REV },
@@ -63,7 +64,6 @@ static const NSUInteger AAPLNumInteropFormats = sizeof(AAPLInteropFormatTable) /
 - (void) setViewport:(CGRect) _viewport{
     self->_viewport = _viewport;
 }
-
 - (void) update {
     
     if (!_session) {
@@ -194,63 +194,20 @@ static const NSUInteger AAPLNumInteropFormats = sizeof(AAPLInteropFormatTable) /
 }
 
 
-- (CVMetalTextureRef)_createTextureFromPixelBuffer:(CVPixelBufferRef)pixelBuffer
-                                      pixelFormat:(MTLPixelFormat)pixelFormat
-                                       planeIndex:(NSInteger)planeIndex {
-    
-    // 입력 검증
-    if (!pixelBuffer || !_capturedImageTextureCache) {
-        NSLog(@"Invalid input: pixelBuffer or texture cache is nil");
-        return nil;
-    }
-    
-    // 플레인 인덱스 검증
-    size_t planeCount = CVPixelBufferGetPlaneCount(pixelBuffer);
-    if (planeIndex >= planeCount) {
-        NSLog(@"Invalid plane index: %ld, available planes: %zu", (long)planeIndex, planeCount);
-        return nil;
-    }
+- (CVMetalTextureRef)_createTextureFromPixelBuffer:(CVPixelBufferRef)pixelBuffer pixelFormat:(MTLPixelFormat)pixelFormat planeIndex:(NSInteger)planeIndex {
     
     const size_t width = CVPixelBufferGetWidthOfPlane(pixelBuffer, planeIndex);
     const size_t height = CVPixelBufferGetHeightOfPlane(pixelBuffer, planeIndex);
     
-    // 크기 검증
-    if (width == 0 || height == 0) {
-//        NSLog(@"Invalid texture dimensions: %zu x %zu", width, height);
-        return nil;
-    }
-    
     CVMetalTextureRef mtlTextureRef = nil;
-    CVReturn status = CVMetalTextureCacheCreateTextureFromImage(
-        kCFAllocatorDefault,  // NULL 대신 명시적으로 지정
-        _capturedImageTextureCache,
-        pixelBuffer,
-        NULL,
-        pixelFormat,
-        width,
-        height,
-        planeIndex,
-        &mtlTextureRef
-    );
-    
+    CVReturn status = CVMetalTextureCacheCreateTextureFromImage(NULL, _capturedImageTextureCache, pixelBuffer, NULL, pixelFormat, width, height, planeIndex, &mtlTextureRef);
     if (status != kCVReturnSuccess) {
-//        NSLog(@"Failed to create texture from pixel buffer. CVReturn: %d", status);
-        // 💥 버그 수정: mtlTextureRef가 nil일 때 release 하면 안됨
-        if (mtlTextureRef) {
-            CFRelease(mtlTextureRef);  // CVBufferRelease -> CFRelease
-            mtlTextureRef = nil;
-        }
-        return nil;
+        CVBufferRelease(mtlTextureRef);
+        mtlTextureRef = nil;
+        NSLog(@"Issue cureating texture from pixel buffer");
     }
     
-    // 성공적으로 생성된 경우 텍스처 정보 로그
-    if (mtlTextureRef) {
-        id<MTLTexture> texture = CVMetalTextureGetTexture(mtlTextureRef);
-//        NSLog(@"Created texture: %zu x %zu, format: %lu",
-//              texture.width, texture.height, (unsigned long)texture.pixelFormat);
-    }
-    
-    return mtlTextureRef;  // 호출자가 CFRelease 해야 함
+    return mtlTextureRef;
 }
 
 - (void) _updateImagePlaneWithFrame{
@@ -272,11 +229,13 @@ static const NSUInteger AAPLNumInteropFormats = sizeof(AAPLInteropFormatTable) /
             vertexData[textureCoordIndex + 1] = transformedCoord.y;
         }
     }
-
+    
+    
 }
 
 - (void) _updateCameraImage {
     
+   
     if(_session.currentFrame){
         // Create two textures (Y and CbCr) from the provided frame's captured image
         CVPixelBufferRef pixelBuffer = _session.currentFrame.capturedImage;
@@ -293,7 +252,6 @@ static const NSUInteger AAPLNumInteropFormats = sizeof(AAPLInteropFormatTable) /
     }
     
 }
-
 - (void) loadMetal {
 
     self._inFlightSemaphore = dispatch_semaphore_create(kMaxBuffersInFlight);
@@ -451,6 +409,7 @@ static const NSUInteger AAPLNumInteropFormats = sizeof(AAPLInteropFormatTable) /
                                       &_combinedCameraTextureCache);
     if(cvret != kCVReturnSuccess)
     {
+        
         assert(!"Issue initiailizing metal texture cache for combined image.");
     }
     // 2. Create a CoreVideo pixel buffer backed Metal texture image from the texture cache.
@@ -750,3 +709,7 @@ static const NSUInteger AAPLNumInteropFormats = sizeof(AAPLInteropFormatTable) /
 
 
 @end
+
+
+
+

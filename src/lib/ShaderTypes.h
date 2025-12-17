@@ -44,8 +44,8 @@ typedef enum TextureIndices {
 //    Metal shaders matches the layout of uniform data set in C code
 typedef struct {
     // Camera Uniforms
-    simd_float4x4 projectionMatrix;
-    simd_float4x4 viewMatrix;
+    matrix_float4x4 projectionMatrix;
+    matrix_float4x4 viewMatrix;
     
     // Lighting Properties
     vector_float3 ambientLightColor;
@@ -57,7 +57,7 @@ typedef struct {
 // Structure shared between shader and C code to ensure the layout of instance uniform data accessed in
 //    Metal shaders matches the layout of uniform data set in C code
 typedef struct {
-    simd_float4x4 modelMatrix;
+    matrix_float4x4 modelMatrix;
 } InstanceUniforms;
 
 #endif /* ShaderTypes_h */

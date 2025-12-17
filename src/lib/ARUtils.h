@@ -12,20 +12,20 @@
 #define STRINGIFY(A) #A
 #include "ofMain.h"
 
-namespace ofxARKit {
-    namespace common {
+namespace ofxARKit { namespace common{
     
         //! joined camera matrices as one object.
         typedef struct {
             ofMatrix4x4 cameraTransform;
             ofMatrix4x4 cameraProjection;
             ofMatrix4x4 cameraView;
-        } ARCameraMatrices;
+        }ARCameraMatrices;
         
         //! borrowed from https://github.com/wdlindmeier/Cinder-Metal/blob/master/include/MetalHelpers.hpp
         //! helpful converting to and from SIMD
         template <typename T, typename U >
-        const U static inline convert( const T & t ) {
+        const U static inline convert( const T & t )
+        {
             U tmp;
             memcpy(&tmp, &t, sizeof(U));
             U ret = tmp;
@@ -33,7 +33,7 @@ namespace ofxARKit {
         }
         
         //! Helper function to determine if user is running at least ios 11.3
-        static bool isIos113() {
+        static bool isIos113(){
             if(@available(iOS 11.3, *)){
                 return true;
             }else{
@@ -42,63 +42,36 @@ namespace ofxARKit {
         }
         
         //! convert to oF mat4
-        static inline const ofMatrix4x4 toMat4( const simd_float4x4& mat ) {
-            return convert<simd_float4x4, ofMatrix4x4>(mat);
+        static inline const ofMatrix4x4 toMat4( const matrix_float4x4& mat ) {
+            return convert<matrix_float4x4, ofMatrix4x4>(mat);
         }
         
         //! convert to simd based mat4
-        static const simd_float4x4 toSIMDMat4(ofMatrix4x4 &mat){
-            return convert<ofMatrix4x4,simd_float4x4>(mat);
+        static const matrix_float4x4 toSIMDMat4(ofMatrix4x4 &mat){
+            return convert<ofMatrix4x4,matrix_float4x4>(mat);
         }
         
         
         //! convert
-        static glm::mat4 toGlmMat4( const simd_float4x4 & mat ) {
-            return convert<simd_float4x4, glm::mat4>(mat);
+        static glm::mat4 toGlmMat4( const matrix_float4x4 & mat ) {
+            return convert<matrix_float4x4, glm::mat4>(mat);
         }
         
         
-
-        //! 디바이스 방향을 고려한 좌표계 변환
-        static ofVec3f getAnchorXYZWithOrientation(ofMatrix4x4 mat, UIInterfaceOrientation orientation){
-            ofVec3f vec(mat.getRowAsVec3f(3));
-            
-            switch(orientation) {
-                case UIInterfaceOrientationPortrait:
-                    // Portrait: 정상적인 변환
-                    return ofVec3f(vec.x, vec.y, vec.z);
-                    
-                case UIInterfaceOrientationPortraitUpsideDown:
-                    // Portrait Upside Down: X, Y 반전
-                    return ofVec3f(-vec.x, -vec.y, vec.z);
-                    
-                case UIInterfaceOrientationLandscapeLeft:
-                    // Landscape Left: X와 Y 교환, Y 반전
-                    return ofVec3f(-vec.y, vec.x, vec.z);
-                    
-                case UIInterfaceOrientationLandscapeRight:
-                    // Landscape Right: X와 Y 교환, X 반전
-                    return ofVec3f(vec.y, -vec.x, vec.z);
-                    
-                default:
-                    return ofVec3f(vec.x, vec.y, vec.z);
-            }
-        }
-
-        //! 기존 함수를 방향 인식 버전으로 업데이트
+        //! Extracts the xyz position from a matrix. It's assumed that the matrix you pass in
+        //! is based off of a ARKit transform matrix which appears to switch some things around.
         static ofVec3f getAnchorXYZ(ofMatrix4x4 mat){
-            UIInterfaceOrientation currentOrientation = (UIInterfaceOrientation)[[UIApplication sharedApplication] statusBarOrientation];
-            return getAnchorXYZWithOrientation(mat, currentOrientation);
+            ofVec3f vec(mat.getRowAsVec3f(3));
+            return ofVec3f(vec.y,vec.x,vec.z);
         }
-
-
+        
         //! Constructs a generalized model matrix for a SIMD mat4
-        static ofMatrix4x4 modelMatFromTransform( simd_float4x4 transform )
+        static ofMatrix4x4 modelMatFromTransform( matrix_float4x4 transform )
         {
-            simd_float4x4 coordinateSpaceTransform = matrix_identity_float4x4;
+            matrix_float4x4 coordinateSpaceTransform = matrix_identity_float4x4;
             // Flip Z axis to convert geometry from right handed to left handed
             coordinateSpaceTransform.columns[2].z = -1.0;
-            simd_float4x4 modelMat = matrix_multiply(transform, coordinateSpaceTransform);
+            matrix_float4x4 modelMat = matrix_multiply(transform, coordinateSpaceTransform);
             return toMat4( modelMat );
         }
         

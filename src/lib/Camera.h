@@ -76,7 +76,7 @@ namespace ofxARKit {
              CVOpenGLESTextureRef getTextureMatteAlpha();
              CVOpenGLESTextureRef getTextureMatteDepth();
              CVOpenGLESTextureRef getTextureDepth();
-            glm::mat3 getAffineTransform();
+             ofMatrix3x3 getAffineTransform();
 
              //! returns vertex shader source suitable for doing things with person occlusion
             std::string getDefaultMatteVertexShader(){ return vertexMatte; }

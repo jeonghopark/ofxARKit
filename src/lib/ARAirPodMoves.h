@@ -36,7 +36,7 @@ typedef struct
 
 
 -(void) init:(AttitudeOFBridge*)aOFB;
--(void) dealloc;
+-(void)dealloc;
 -(void) startTracking;
 -(void) endTracking;
 
